@@ -1,0 +1,8 @@
+{
+  "name": "Remix: Al Brolosy Group EOS",
+  "description": "منظومة البرلسي جروب للتطوير العقاري - Enterprise Real Estate Operating System",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

@@ -1,0 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "Cairo", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Custom premium styling for Al Brolosy Group */
+:root {
+  --brand-red: #ad0404;
+  --brand-red-hover: #c10a0a;
+  --brand-red-active: #8f0303;
+
+  --brand-black: #000000;
+  --brand-gray: #6d6e71;
+  --brand-dark-gray: #606060;
+
+  --brand-cream: #f7f1e2;
+  --brand-warm-cream: #f7ecd5;
+  --brand-white: #ffffff;
+
+  --dark-background: #080809;
+  --dark-surface: #111113;
+  --dark-field: #171719;
+  --dark-border: #2a2a2e;
+
+  --text-primary-dark: #ffffff;
+  --text-secondary-dark: #a5a5aa;
+  --text-muted-dark: #717177;
+
+  --radius-small: 10px;
+  --radius-medium: 18px;
+  --radius-large: 28px;
+}
+
+body {
+  background-color: var(--dark-background);
+  color: var(--text-primary-dark);
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+/* Premium custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--dark-background);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--dark-border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-red);
+}
+
+/* Glassmorphism card premium styling */
+.glass-card {
+  background: rgba(17, 17, 19, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(42, 42, 46, 0.7);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+}
+
+.input-field {
+  background-color: var(--dark-field);
+  border: 1px solid var(--dark-border);
+  color: var(--text-primary-dark);
+  transition: all 0.2s ease-in-out;
+}
+.input-field:focus {
+  border-color: var(--brand-red);
+  box-shadow: 0 0 0 2px rgba(173, 4, 4, 0.25);
+  outline: none;
+}

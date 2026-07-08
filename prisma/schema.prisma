@@ -1,0 +1,196 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ==========================================
+// 1. ORGANIZATION & HIERARCHY
+// ==========================================
+
+model Company {
+  id          String       @id @default(uuid())
+  nameAr      String
+  nameEn      String
+  logo        String?
+  createdAt   DateTime     @default(now())
+  branches    Branch[]
+  employees   Employee[]
+  projects    Project[]
+}
+
+model Branch {
+  id          String       @id @default(uuid())
+  nameAr      String
+  nameEn      String
+  companyId   String
+  company     Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  departments Department[]
+  employees   Employee[]
+}
+
+model Department {
+  id          String       @id @default(uuid())
+  nameAr      String
+  nameEn      String
+  branchId    String
+  branch      Branch       @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  employees   Employee[]
+}
+
+// ==========================================
+// 2. EMPLOYEES & USERS
+// ==========================================
+
+model Employee {
+  id           String      @id @default(uuid())
+  employeeId   String      @unique // e.g., ABG-1001
+  fullNameAr   String
+  fullNameEn   String
+  email        String      @unique
+  jobPosition  String
+  companyId    String
+  company      Company     @relation(fields: [companyId], references: [id])
+  branchId     String
+  branch       Branch      @relation(fields: [branchId], references: [id])
+  departmentId String
+  department   Department  @relation(fields: [departmentId], references: [id])
+  
+  // Account relation
+  user         User?
+  
+  // Sales specific fields
+  targetCalls       Int    @default(30)
+  targetMeetings    Int    @default(5)
+  targetSalesValue  Float  @default(1000000.0)
+
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model User {
+  id                String       @id @default(uuid())
+  username          String       @unique
+  email             String       @unique
+  password          String
+  employeeId        String       @unique
+  employee          Employee     @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  roleId            String
+  role              Role         @relation(fields: [roleId], references: [id])
+  mustChangePassword Boolean     @default(true)
+  isActive          Boolean      @default(true)
+  loginAttempts     Int          @default(0)
+  lockedUntil       DateTime?
+  twoFactorSecret   String?
+  isTwoFactorEnabled Boolean     @default(false)
+  createdAt         DateTime     @default(now())
+  sessions          Session[]
+}
+
+model Session {
+  id           String    @id @default(uuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token        String    @unique
+  deviceInfo   String?
+  ipAddress    String?
+  expiresAt    DateTime
+  createdAt    DateTime  @default(now())
+}
+
+// ==========================================
+// 3. ROLES & PERMISSIONS (RBAC)
+// ==========================================
+
+model Role {
+  id          String            @id @default(uuid())
+  nameAr      String            @unique
+  nameEn      String            @unique
+  description String?
+  users       User[]
+  permissions RolePermission[]
+}
+
+model Permission {
+  id          String            @id @default(uuid())
+  code        String            @unique // e.g., 'view_financials', 'manage_users'
+  nameAr      String
+  nameEn      String
+  module      String            // e.g., 'crm', 'finance', 'hr'
+  roles       RolePermission[]
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  role         Role        @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission  @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+}
+
+// ==========================================
+// 4. CRM & LEADS
+// ==========================================
+
+model Customer {
+  id          String       @id @default(uuid())
+  fullNameAr  String
+  fullNameEn  String
+  phone       String       @unique
+  email       String?      @unique
+  jobAr       String?
+  jobEn       String?
+  country     String       @default("Egypt")
+  city        String       @default("Cairo")
+  rating      String       @default("Silver") // Silver, Gold, Platinum, VIP
+  createdAt   DateTime     @default(now())
+  leads       Lead[]
+}
+
+model Lead {
+  id              String       @id @default(uuid())
+  customerId      String
+  customer        Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  source          String       @default("Meta Ads") // Meta, Google, Organic, etc.
+  interestedIn    String       // Project Name or Unit details
+  budget          Float
+  status          String       @default("New Lead") // New Lead, Contacted, Qualified, Reservation, Won, Lost
+  score           Int          @default(50)
+  assignedTo      String?      // Employee ID/Email
+  notes           String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
+// ==========================================
+// 5. INVENTORY & REAL ESTATE PROJECTS
+// ==========================================
+
+model Project {
+  id          String   @id @default(uuid())
+  nameAr      String
+  nameEn      String
+  locationAr  String
+  locationEn  String
+  description String?
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id])
+  units       Unit[]
+  createdAt   DateTime @default(now())
+}
+
+model Unit {
+  id          String   @id @default(uuid())
+  unitCode    String   @unique // e.g., B3-FL2-U12
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  type        String   // Apartment, Villa, Duplex, Penthouse, Commercial
+  area        Float    // Square meters
+  price       Float
+  status      String   @default("Available") // Available, Reserved, Sold, Blocked
+  createdAt   DateTime @default(now())
+}
